@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getSingleTodoService, updateOneTodoService } from "../services/todo.services";
+import { useParams, useNavigate } from "react-router-dom"
 
 function TodoEdit() {
+
+  const params = useParams()
+  const navigate = useNavigate()
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isUrgent, setIsUrgent] = useState(false);
@@ -9,9 +15,55 @@ function TodoEdit() {
   const handleDescriptionChange = (e) => setDescription(e.target.value);
   const handleIsUrgentChange = (e) => setIsUrgent(e.target.checked);
 
+  useEffect(() => {
+    getData()
+  }, [])
+
+  const getData = async () => {
+    
+    try {
+      
+      // pedirle al backend la info de este Todo
+      const response = await getSingleTodoService(params.todoId)
+      console.log(response)
+
+      setTitle(response.data.title)
+      setDescription(response.data.description)
+      setIsUrgent(response.data.isUrgent)
+
+      // const { title, description, isUrgent} = response.data
+
+      // setTitle(title)
+      // setDescription(description)
+      // setIsUrgent(isUrgent)
+
+    } catch (error) {
+      navigate("/error")
+    }
+
+  }
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // ... edit the ToDo here
+
+    try {
+      
+      const updatedTodo = {
+        title: title,
+        description: description,
+        isUrgent: isUrgent
+      }
+
+      await updateOneTodoService(params.todoId, updatedTodo)
+
+      navigate(`/todos/${params.todoId}/details`)
+
+    } catch (error) {
+      navigate("/error")
+    }
+
   };
 
   return (
@@ -26,7 +78,7 @@ function TodoEdit() {
           onChange={handleTitleChange}
           value={title}
         />
-
+        <br />
         <label htmlFor="description">Description</label>
         <input
           type="text"
@@ -34,7 +86,7 @@ function TodoEdit() {
           onChange={handleDescriptionChange}
           value={description}
         />
-
+        <br />
         <label htmlFor="isUrgent">Urgent</label>
         <input
           type="checkbox"
@@ -42,7 +94,7 @@ function TodoEdit() {
           onChange={handleIsUrgentChange}
           checked={isUrgent}
         />
-
+        <br />
         <button type="submit">Editar</button>
       </form>
     </div>
