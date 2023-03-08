@@ -39,6 +39,7 @@ function Login() {
       // establecer mi Contexto para decirle a toda la app, que el usuario está activo
       authenticateUser()
       console.log("si vemos este console.log significa que el Token fue validado")
+      navigate("/todos")
 
     } catch (error) {
       console.log(error)
